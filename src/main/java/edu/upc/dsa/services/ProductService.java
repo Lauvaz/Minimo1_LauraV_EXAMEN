@@ -35,12 +35,14 @@ public class ProductService {
         scenario.addUser("Laura", "123");
         scenario.addUser("Alba", "231");
         scenario.addUser("Pau", "321");
+        scenario.addUser("Pepa", "333");
 
         Order order = new Order(scenario.getUser("Pau"));
         order.addLP(new Product("pa", 0.5, 4));
         order.addLP(new Product("donut",2.2,2));
         order.addLP(new Product("cafe",5.0,1));
         order.addLP(new Product("bocata",6.4,1));
+        order.addLP(new Product("te",2,5));
         scenario.doOrder(order);
     }
 
