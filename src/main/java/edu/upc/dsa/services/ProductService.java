@@ -1,8 +1,8 @@
 package edu.upc.dsa.services;
 
 
-import edu.upc.dsa.ProductManager;
-import edu.upc.dsa.ProductManagerImpl;
+import edu.upc.dsa.PuntoManager;
+import edu.upc.dsa.PuntoManagerImpl;
 import edu.upc.dsa.models.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,174 +13,106 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 
 @Api(value = "/Products", description = "Endpoint to Track Service")
 @Path("/Products")
 public class ProductService {
 
-    private ProductManager scenario;
+    private PuntoManager scenario;
 
     public ProductService() {
-        scenario = ProductManagerImpl.getInstance();
-        scenario.addProduct(new Product("agua", 1, 10));
-        scenario.addProduct(new Product("llet", 2, 5));
-        scenario.addProduct(new Product("pa", 0.5, 15));
-        scenario.addProduct(new Product("patata", 3, 8));
-        scenario.addProduct(new Product("donut", 2.2, 20));
-        scenario.addProduct(new Product("cafe", 5.0, 18));
-        scenario.addProduct(new Product("bocata", 6.4, 13));
+        scenario = PuntoManagerImpl.getInstance();
+        scenario.addPunto(new Punto("puente", 1));
+        scenario.addPunto(new Punto("puerta", 2));
+        scenario.addPunto(new Punto("escalera", 3));
 
-        scenario.addUser("Laura", "123");
-        scenario.addUser("Alba", "231");
-        scenario.addUser("Pau", "321");
-        scenario.addUser("Pepa", "333");
 
-        Order order = new Order(scenario.getUser("Pau"));
-        order.addLP(new Product("pa", 0.5, 4));
-        order.addLP(new Product("donut",2.2,2));
-        order.addLP(new Product("cafe",5.0,1));
-        order.addLP(new Product("bocata",6.4,1));
-        order.addLP(new Product("te",2,5));
-        scenario.doOrder(order);
+        scenario.addUser("Laura", "111");
+        scenario.addUser("Anna", "222");
+
+        ListPuntos addpuntos = new ListPuntos(scenario.getUser("Laura"));
+        addpuntos.addPunto(new Punto("escalera", 2));
+
     }
 
 
-
     @POST
-    @ApiOperation(value = "Add a new product", notes = "Add a new product")
+    @ApiOperation(value = "Add a new user", notes = "Add a new user")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful", response = Product.class),
+            @ApiResponse(code = 201, message = "Successful", response = User.class),
             @ApiResponse(code = 500, message = "Validation Error")
     })
-    @Path("/addProduct")
+    @Path("/addUser")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addProduct(Product product) {
+    public Response addUser(User user) {
 
-        if (product.getName()==null || product.getAmount()==0 ) return Response.status(500).entity(product).build();
-        this.scenario.addProduct(product);
-        return Response.status(201).entity(product).build()  ;
+        if (user.getName()==null || user.getId()==null || user.getPuntosList()==null) return Response.status(500).entity(user).build();
+        this.scenario.addUser(user.getName(), user.getId());
+        return Response.status(201).entity(user).build()  ;
 
     }
 
     @POST
-    @ApiOperation(value = "Create a new Order", notes = "Create a new Order")
+    @ApiOperation(value = "Add a new punto", notes = "Add a new punto")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful", response=Order.class),
+            @ApiResponse(code = 201, message = "Successful", response = Punto.class),
             @ApiResponse(code = 500, message = "Validation Error")
-
     })
-
-    @Path("/doOrder/")
+    @Path("/addPunto")
     @Consumes(MediaType.APPLICATION_JSON)
+    public Response addProduct(Punto punto) {
 
-    public Response doOrder(Order order) {
-        Order order2 = new Order(this.scenario.getUser(order.user.getName()));
-        if (order2.getUser() == null) return Response.status(500).entity(order).build(); // solo funciona con usuarios ya establecido mas arriba!
-        this.scenario.doOrder(order2);
-        return Response.status(201).entity(order).build();
+        if (punto.getName()==null || punto.getAmount()==0 ) return Response.status(500).entity(punto).build();
+        this.scenario.addPunto(punto);
+        return Response.status(201).entity(punto).build()  ;
+
     }
 
     @GET
-    @ApiOperation(value = "Get products by price", notes = "Get products by price")
+    @ApiOperation(value = "Get Users by Name", notes = "Get Users by Name")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful", response = Product.class, responseContainer = "List"),
+            @ApiResponse(code = 201, message = "Successful", response = User.class, responseContainer = "List"),
             @ApiResponse(code = 404, message = "Products not found")
     })
-    @Path("/ProductsByPrice/")
+    @Path("/GetUsersbyName/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProductsByPrice() {
-        List<Product> list = scenario.getProductsByPrice();
-        GenericEntity<List<Product>> entity = new GenericEntity<List<Product>>(list) {};
+    public Response getUsersbyName() {
+        List<User> list = scenario.getUsersbyName();
+        GenericEntity<List<User>> entity = new GenericEntity<List<User>>(list) {};
+        if (list.size() == 0) return Response.status(404).build();
+        return Response.status(201).entity(entity).build();
+    }
+
+
+    @GET
+    @ApiOperation(value = "Get puntos by User", notes = "Get punto by User")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successful", response = ListPuntos.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "Products not found")
+    })
+    @Path("/GetPuntosUser/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPuntosUser(User user) {
+        List<ListPuntos> list = scenario.getPuntosUser(user);
+        GenericEntity<List<ListPuntos>> entity = new GenericEntity<List<ListPuntos>>(list) {};
         if (list.size() == 0) return Response.status(404).build();
         return Response.status(201).entity(entity).build();
     }
 
     @GET
-    @ApiOperation(value = "Get products by Sales", notes = "Get products by sales")
+    @ApiOperation(value = "Get puntos List", notes = "Get puntos List")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful", response = Product.class, responseContainer = "List"),
+            @ApiResponse(code = 201, message = "Successful", response = ListPuntos.class, responseContainer = "List"),
             @ApiResponse(code = 404, message = "Products not found")
     })
-    @Path("/ProductsBySales/")
+    @Path("/GetPuntosList/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProductsBySales() {
-        List<Product> list = scenario.getProductsBySales();
-        GenericEntity<List<Product>> entity = new GenericEntity<List<Product>>(list) {};
+    public Response getPuntosList() {
+        List<ListPuntos> list = scenario.getPuntosList();
+        GenericEntity<List<ListPuntos>> entity = new GenericEntity<List<ListPuntos>>(list) {};
         if (list.size() == 0) return Response.status(404).build();
         return Response.status(201).entity(entity).build();
     }
 
-    @GET
-    @ApiOperation(value = "Get order by users", notes = "Get order by users")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful", response = OrderTO.class, responseContainer = "List"),
-            @ApiResponse(code = 404, message = "Products not found")
-    })
-
-    @Path("/OrderByUsers/{user}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getOrdersByUser(@PathParam("user") String user) {
-        List<Order> list = scenario.getOrdersByUser(user);
-        if (list.size() == 0) return Response.status(404).build();
-
-        System.out.println(list.toArray());
-        //
-        List<OrderTO> aux = new ArrayList<OrderTO>();
-
-        for (Order o: list) {
-            aux.add(new OrderTO(o));
-        }
-
-
-
-        GenericEntity<List<OrderTO>> entity = new GenericEntity<List<OrderTO>>(aux) {};
-        return Response.status(201).entity(entity).build()  ;
-
-        /*
-        GenericEntity<List<Track>> entity = new GenericEntity<List<Track>>(tracks) {};
-        return Response.status(201).entity(entity).build()  ;
-        */
-
-    }
-
-/*
-    @DELETE
-    @ApiOperation(value = "delete a Track", notes = "asdasd")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful"),
-            @ApiResponse(code = 404, message = "Track not found")
-    })
-
-    @Path("/{id}")
-    public Response deleteTrack(@PathParam("id") String id) {
-        Track t = this.tm.getTrack(id);
-        if (t == null) return Response.status(404).build();
-        else this.tm.deleteTrack(id);
-        return Response.status(201).build();
-    }
-
-
-
-    @PUT
-    @ApiOperation(value = "New order", notes = "New order")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful"),
-            @ApiResponse(code = 404, message = "Track not found")
-    })
-    @Path("/")
-    public Response updateTrack(Track track) {
-
-        Track t = this.tm.updateTrack(track);
-
-        if (t == null) return Response.status(404).build();
-
-        return Response.status(201).build();
-    }
-*/
-
-
-
-
-}
+ }
