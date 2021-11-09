@@ -1,5 +1,5 @@
 # Minimo1_LauraV_EXAMEN
-Pero he creado las clases Users, Punto y ListPunto. Posteriormente se ha implementado cada función necesaria tanto en el PuntoManager como en el PuntoManagerImpl. Finalmente se ha creado el PuntoService.
+Primero he creado las clases Users, Punto y ListPunto. Posteriormente se ha implementado cada función necesaria tanto en el PuntoManager como en el PuntoManagerImpl. Finalmente se ha creado el PuntoService.
 He desarrollado todas las funciones pero no getusersbyname, getpuntosuser y getpuntoslist no funcionan como esperaba. 
 Creo que la funcion getusersbyname se deberia hacer de la manera siguiente, pero no me ha dado tiempo a implementarla.
 
